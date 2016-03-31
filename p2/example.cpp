@@ -15,8 +15,8 @@ struct thread_args
 	int i1;
 	int i2;
 
-} t_args;
-
+};
+struct thread_args t_args;
 pthread_mutex_t mutex, valtex;
 pthread_cond_t cond;
 
@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
 			t_args.i1 = workSet[val];
 			t_args.i2 = workSet[val+1];
 			//printf("i1: %d\ni2: %d\n", t_args.i1, t_args.i2);
-			pthread_create(&(t_ids[thread_size]), NULL, find_max, (void *)&t_args);
+			pthread_create(&t_ids[thread_size], NULL, find_max, NULL);
 			thread_size++;
 		}
 		if (ret == 0) {
@@ -67,17 +67,16 @@ int main(int argc, char *argv[])
 		//printf("%d\n", rounds);
 	}
 	//free(t_args);
-	val = workSet[0];
-	printf("%d\n", val);
+	i = workSet[0];
+	printf("%d\n", i);
 	//pthread_mutex_destroy(&mutex);
 	return 0;	
 }
 
-void *find_max(void* params) {	
-	thread_args m = *((thread_args*)(params));
-	int a = m.i1;
-	int b = m.i2;
+void* find_max(void* params) {	
 	pthread_mutex_lock(&valtex);
+	int a = t_args.i1;
+	int b = t_args.i2;
 	if (a > b) {
 		curSet.push_back(a);
 	} else {
