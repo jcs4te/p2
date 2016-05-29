@@ -36,41 +36,43 @@ int main(int argc, char *argv[])
 	pthread_mutex_init(&mutex, NULL);
 	pthread_mutex_init(&valtex, NULL);
 	pthread_cond_init(&cond, NULL);
-	int integers[8];
 	int i = 0, tmp;
-	std::ifstream read("inData.txt");
-	while(read >> tmp) {
+	std::ifstream file;
+	file.open("inData.txt");
+	if (!file) {
+		printf("ERR\n");
+		return 0;
+	}
+	while(file >> tmp) {
 		workSet.push_back(tmp);
 		i++;
 	}
-	printf("%d\n", i);
+	file.close();
 	int rounds = Log2(i);
 	int to_process = i;
 	pthread_t t_ids[i/2];
 	int thread_size = 0;
 	struct thread_args *t_args;
-	//rounds = Log2(i);
-	//workSet.assign(integers, integers+i);
 	while(rounds != 0) {
 		remaining = (to_process)/2;
 		for (int val = 0; val < to_process; val+=2) {
 			t_args = malloc(sizeof(struct thread_args));
 			(*t_args).i1 = workSet[val];
 			(*t_args).i2 = workSet[val+1];
-			//printf("i1: %d\ni2: %d\n", t_args.i1, t_args.i2);
 			pthread_create(&t_ids[thread_size], NULL, find_max, (void*)t_args);
-			thread_size++;
+			if (thread_size == (i/2)-1){
+				thread_size = 0;
+			} else {
+				thread_size++;
+			}
 		}
 		if (ret == 0) {
 			to_process = to_process / 2;
 			rounds--;
 		}
-		//printf("%d\n", rounds);
 	}
-	//free(t_args);
-	i = workSet[0];
+	i = workSet.at(0);
 	printf("%d\n", i);
-	//pthread_mutex_destroy(&mutex);
 	return 0;	
 }
 
@@ -103,5 +105,5 @@ void* find_max(void *params) {
 	}
 	pthread_mutex_unlock(&mutex);
 	free (params);
-	pthread_exit(NULL);	
+	pthread_exit(NULL);
 }
